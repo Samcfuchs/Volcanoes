@@ -65,13 +65,22 @@ div.container {
     margin-bottom: 40px;
 }
 
-div.left {
-    flex-shrink: 3;
-    width: 600px;
+div.detail {
+    height: 100px;
+    width: 200px;
+    outline: 1px solid #999;
+    position: absolute;
+    border-radius: 3px;
+    background-color: #eee;
+    pointer-events: none;
+    display: none;
 }
-div.right {
 
-}
-div.right svg {
+div.detail span {
     display: block;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+div.detail img {
+    height: 100px;
 }

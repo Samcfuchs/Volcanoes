@@ -5,7 +5,14 @@ var svg = d3.select("svg#viz")
 const width = svg.attr('width')
 const height = svg.attr('height')
 
+const chart_width = width - (MARGIN.left + MARGIN.right)
+const chart_height = height - (MARGIN.top + MARGIN.bottom)
+
 const chart = svg.append('g').attr("transform", `translate(${MARGIN.left}, ${MARGIN.right})`)
+const interaction = chart.append("rect").attr("x",0).attr("y",0)
+    .attr("width",chart_width).attr("height",chart_height)
+    .attr("fill","none")
+    .style("pointer-events","all");
 
 let latlong_parse = function(d) {
     var lat = d.Latitude.split('°')
@@ -20,6 +27,7 @@ let latlong_parse = function(d) {
     return [lat[0],long[0]]
 }
 
+/*
 function geoPipeline(...transforms) {
     return sink => {
       for (let i = transforms.length - 1; i >= 0; --i) {
@@ -49,10 +57,6 @@ function geoRotatePhi(deltaPhi) {
     });
 }
 
-var projection = d3.geoOrthographic()
-projection = d3.geoMercator()
-//projection = d3.geoHill()
-/*
 var preclip = function () {
     const distance = 16;
     const tilt = 0 * Math.PI / 180;
@@ -75,10 +79,16 @@ projection = d3.geoSatellite()
     .precision(0.1)
 */
 
+
+var projection = d3.geoOrthographic()
+projection = d3.geoMercator()
+//projection = d3.geoHill()
+
 let yaw = 150;
 
 const requestData = async function() {
     let volcano = await d3.csv('fixed_latlong.csv')
+    console.log(volcano)
 
     // Get this map?
     var context = await d3.json('https://gist.githubusercontent.com/d3indepth/f28e1c3a99ea6d84986f35ac8646fac7/raw/c58cede8dab4673c91a3db702d50f7447b373d98/ne_110m_land.json')
@@ -91,8 +101,31 @@ const requestData = async function() {
 
     projection.rotate([yaw, -20])
     volcano.forEach( d => d.position = projection([d.long,d.lat]))
+
+    // Build some interaction functions
     
-    map.selectAll('circle')
+    let detail = d3.select('div.detail')
+
+    let focus = function(e, d) {
+        detail.style('display', 'inline-block')
+        detail.select('span#title').text(d.Volcano_Name)
+        detail.select('span#nation').text(d.Country)
+        detail.select('img').attr('src', d.Volcano_Image)
+        d3.select(this).attr('stroke', 'black')
+    }
+
+    let hide = function(e, d) {
+        detail.style('display','none')
+        d3.select(this).attr('stroke', 'none')
+    }
+
+    let move = function(e, d) {
+        detail.style('left', e.pageX+10+'px').style('top', e.pageY+10+'px')
+    }
+
+    // Insert the points, apply the interactions
+
+    let points = map.selectAll('circle')
         .data(volcano)
         .join('circle')
         .attr('cx', d => d.position[0])
@@ -100,7 +133,12 @@ const requestData = async function() {
         .attr('r', 2)
         .attr('fill', 'coral')
         .attr('alpha', 0.2)
-
+        .attr('index', 0) 
+        .on('mouseover', focus)
+        .on('mouseout', hide)
+        .on('mousemove', move)
+    
+    // Rotate the projection a little and update the points and so forth
     function update() {
         yaw += 0.5
 
