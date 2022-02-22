@@ -93,6 +93,9 @@ const requestData = async function() {
     // Get this map?
     var context = await d3.json('https://gist.githubusercontent.com/d3indepth/f28e1c3a99ea6d84986f35ac8646fac7/raw/c58cede8dab4673c91a3db702d50f7447b373d98/ne_110m_land.json')
 
+    let color_scale = d3.scaleOrdinal().domain(volcano.map(d => d.epoch_period))
+        .range(d3.schemeCategory10)
+
     //projection.fitSize([800,800], context)
     //projection.rotate([yaw, -20])
     var path = d3.geoPath().projection(projection)
@@ -130,10 +133,10 @@ const requestData = async function() {
         .join('circle')
         .attr('cx', d => d.position[0])
         .attr('cy', d => d.position[1])
-        .attr('r', 2)
-        .attr('fill', 'coral')
-        .attr('alpha', 0.2)
-        .attr('index', 0) 
+        .attr('r', 4)
+        .attr('fill', d => color_scale(d.epoch_period))
+        .attr('opacity', 0.2)
+        .attr('index', 0)
         .on('mouseover', focus)
         .on('mouseout', hide)
         .on('mousemove', move)

@@ -66,21 +66,32 @@ div.container {
 }
 
 div.detail {
-    height: 100px;
-    width: 200px;
     outline: 1px solid #999;
     position: absolute;
-    border-radius: 3px;
-    background-color: #eee;
+    background-color: #fff;
     pointer-events: none;
     display: none;
 }
 
 div.detail span {
     display: block;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: Helvetica;
+    color: #888
 }
 
+div.detail div.text {
+    display:inline-block;
+    margin: 10px;
+}
+
+div.detail div.img {
+    float: left;
+}
 div.detail img {
     height: 100px;
+}
+
+span#title {
+    font-size: 30px;
+    color: black;
 }
