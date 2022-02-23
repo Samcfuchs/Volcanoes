@@ -113,8 +113,6 @@ const requestData = async function() {
         detail.select('span#type').text(d.epoch_period)
             .style('color', color_scale(d.epoch_period))
         d3.select(this).attr('stroke', 'black')
-
-        detail.text(d.displacement)
     }
 
     let hide = function(e, d) {
@@ -138,7 +136,7 @@ const requestData = async function() {
         .join('circle')
         .attr('cx', d => d.position[0])
         .attr('cy', d => d.position[1])
-        .attr('r', 2)
+        .attr('r', d => 0.5)
         .attr('fill', d => color_scale(d.epoch_period))
         .attr('opacity', 0.4)
         .attr('index', 0)
@@ -163,6 +161,7 @@ const requestData = async function() {
     }
     console.log(get_absolute_angle)
 
+    let distance_scale = d3.scaleLinear().domain([0,90]).range([6,2])
     // Rotate the projection a little and update the points and so forth
     function update(ang) {
         yaw += 0.5
@@ -188,10 +187,11 @@ const requestData = async function() {
         
         map.selectAll('circle')
             .data(volcano)
-            .attr('r', d => d.visible ? 6 : 0)
             .join('circle')
             .attr('cx', d => d.position[0])
             .attr('cy', d => d.position[1])
+            .style('display', d => d.visible ? '' : 'none')
+            .attr('r', d => distance_scale(d.displacement))
 
         map.select('path.graticule').data([graticule()])
             .attr('d',path)
