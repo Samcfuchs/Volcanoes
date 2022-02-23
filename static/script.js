@@ -8,24 +8,13 @@ const height = svg.attr('height')
 const chart_width = width - (MARGIN.left + MARGIN.right)
 const chart_height = height - (MARGIN.top + MARGIN.bottom)
 
-const chart = svg.append('g').attr("transform", `translate(${MARGIN.left}, ${MARGIN.right})`)
+const chart = svg.append('g').attr('class','chart')
+    //.attr("transform", `translate(${MARGIN.left}, ${MARGIN.right})`)
 const interaction = chart.append("rect").attr("x",0).attr("y",0)
     .attr("width",chart_width).attr("height",chart_height)
     .attr("fill","none")
     .style("pointer-events","all");
 
-let latlong_parse = function(d) {
-    var lat = d.Latitude.split('°')
-    var long = d.Longitude.split('°')
-
-    lat[0] = +(lat[0])
-    long[0] = +(long[0])
-
-    if (lat[1] == "S") lat[0] *= -1
-    if (long[1] == "W") long[0] *= -1
-
-    return [lat[0],long[0]]
-}
 
 /*
 function geoPipeline(...transforms) {
@@ -81,8 +70,8 @@ projection = d3.geoSatellite()
 
 
 var projection = d3.geoOrthographic()
-projection = d3.geoMercator()
-//projection = d3.geoHill()
+//projection = d3.geoArmadillo()
+projection = d3.geoHill()
 
 let yaw = 150;
 
@@ -99,10 +88,12 @@ const requestData = async function() {
     //projection.fitSize([800,800], context)
     //projection.rotate([yaw, -20])
     var path = d3.geoPath().projection(projection)
+    var graticule = d3.geoGraticule();
 
-    let map = chart.append('g')
+    let map = chart.append('g').classed('map',true)
 
     projection.rotate([yaw, -20])
+    projection.fitSize([600,600],context)
     volcano.forEach( d => d.position = projection([d.long,d.lat]))
 
     // Build some interaction functions
@@ -128,6 +119,10 @@ const requestData = async function() {
 
     // Insert the points, apply the interactions
 
+    map.append('path').data([graticule()]).attr('d',path).attr('class','graticule')
+        .style('fill','none')
+        .style('stroke','grey')
+
     let points = map.selectAll('circle')
         .data(volcano)
         .join('circle')
@@ -141,6 +136,13 @@ const requestData = async function() {
         .on('mouseout', hide)
         .on('mousemove', move)
     
+    /*
+    var lines = map.selectAll('path.graticule').data([graticule()])
+    lines.enter().append('path').attr('class', 'graticule')
+    lines.attr('d', path)
+    lines.exit().remove()
+    */
+
     // Rotate the projection a little and update the points and so forth
     function update() {
         yaw += 0.5
@@ -148,9 +150,10 @@ const requestData = async function() {
         projection.rotate([yaw, -20])
         volcano.forEach( d => d.position = projection([d.long,d.lat]))
 
-        map.selectAll('path')
+        map.selectAll('path.map')
             .data(context.features)
             .join("path")
+            .attr('class', 'map')
             .attr('d', path)
             .attr('stroke', '#000')
             .attr('fill','none')
