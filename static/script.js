@@ -15,6 +15,10 @@ const interaction = chart.append("rect").attr("x",0).attr("y",0)
     .attr("fill","none")
     .style("pointer-events","all");
 
+Number.prototype.mod = function(n) {
+    return ((this%n)+n)%n;
+};
+
 /*
 function geoPipeline(...transforms) {
     return sink => {
@@ -77,7 +81,7 @@ let yaw = 150;
 const requestData = async function() {
     let volcano = await d3.csv('fixed_latlong.csv')
 
-        volcano = volcano.filter(d => d.Volcano_Image != "https://volcano.si.edu/includes/images/noimage.jpg")
+        //volcano = volcano.filter(d => d.Volcano_Image != "https://volcano.si.edu/includes/images/noimage.jpg")
     console.log(volcano)
 
     // Get this map?
@@ -109,6 +113,8 @@ const requestData = async function() {
         detail.select('span#type').text(d.epoch_period)
             .style('color', color_scale(d.epoch_period))
         d3.select(this).attr('stroke', 'black')
+
+        detail.text(d.displacement)
     }
 
     let hide = function(e, d) {
@@ -151,12 +157,26 @@ const requestData = async function() {
     lines.exit().remove()
     */
 
+    let get_absolute_angle = function(f, a) {
+        d = 360 * Math.abs((a - f)/360 - Math.floor((a-f)/360 + 1/2))
+        return d
+    }
+    console.log(get_absolute_angle)
+
     // Rotate the projection a little and update the points and so forth
     function update(ang) {
         yaw += 0.5
 
-        projection.rotate([ang, -20])
-        volcano.forEach( d => d.position = projection([d.long,d.lat]))
+        projection.rotate([ang, -0])
+        var front = -ang
+        var otherfront = 360 - ang
+        console.log(front, otherfront)
+        volcano.forEach( d => {
+            d.position = projection([d.long,d.lat]);
+            d.displacement = get_absolute_angle(front, d.long)
+
+            d.visible = (d.displacement) < 90
+        })
 
         map.selectAll('path.map')
             .data(context.features)
@@ -168,6 +188,7 @@ const requestData = async function() {
         
         map.selectAll('circle')
             .data(volcano)
+            .attr('r', d => d.visible ? 6 : 0)
             .join('circle')
             .attr('cx', d => d.position[0])
             .attr('cy', d => d.position[1])
@@ -182,7 +203,6 @@ const requestData = async function() {
 
     let sliderupdate = function () {
         let v = slider.node().valueAsNumber
-        console.log(v)
         update(v)
     }
 

@@ -89,6 +89,8 @@ div.detail div.img {
 }
 div.detail img {
     height: 150px;
+    margin:0;
+    padding: 0;
 }
 
 span#title {
