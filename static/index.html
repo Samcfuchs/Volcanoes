@@ -13,6 +13,7 @@
 <body>
     <div id="content">
         <h1>Volcanoes!</h1>
+        <input type="range" name="longitude" id="longitude" min='-180' max='180' value='164'>
         <svg id='viz' height="800" width="800"></svg>
         <script src="script.js"></script>
         <div class='detail'>
@@ -23,6 +24,8 @@
                 <span id='title'></span>
                 <span id="nation"></span>
                 <span id='height'></span>
+                <span class='label'>Epoch:</span>
+                <span id="type"></span>
             </div>
         </div>
     </div>

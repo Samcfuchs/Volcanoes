@@ -1,5 +1,5 @@
 
-const MARGIN = { top:10, bottom:10, left:10, right:10 }
+const MARGIN = { top:20, bottom:10, left:40, right:40 }
 var svg = d3.select("svg#viz")
 
 const width = svg.attr('width')
@@ -9,12 +9,11 @@ const chart_width = width - (MARGIN.left + MARGIN.right)
 const chart_height = height - (MARGIN.top + MARGIN.bottom)
 
 const chart = svg.append('g').attr('class','chart')
-    //.attr("transform", `translate(${MARGIN.left}, ${MARGIN.right})`)
+    .attr("transform", `translate(${MARGIN.left}, ${MARGIN.top})`)
 const interaction = chart.append("rect").attr("x",0).attr("y",0)
     .attr("width",chart_width).attr("height",chart_height)
     .attr("fill","none")
     .style("pointer-events","all");
-
 
 /*
 function geoPipeline(...transforms) {
@@ -71,12 +70,14 @@ projection = d3.geoSatellite()
 
 var projection = d3.geoOrthographic()
 //projection = d3.geoArmadillo()
-projection = d3.geoHill()
+//projection = d3.geoHill()
 
 let yaw = 150;
 
 const requestData = async function() {
     let volcano = await d3.csv('fixed_latlong.csv')
+
+        volcano = volcano.filter(d => d.Volcano_Image != "https://volcano.si.edu/includes/images/noimage.jpg")
     console.log(volcano)
 
     // Get this map?
@@ -92,8 +93,8 @@ const requestData = async function() {
 
     let map = chart.append('g').classed('map',true)
 
-    projection.rotate([yaw, -20])
-    projection.fitSize([600,600],context)
+    //projection.rotate([yaw, -20])
+    projection.fitSize([chart_width,chart_height],context)
     volcano.forEach( d => d.position = projection([d.long,d.lat]))
 
     // Build some interaction functions
@@ -105,6 +106,8 @@ const requestData = async function() {
         detail.select('span#title').text(d.Volcano_Name)
         detail.select('span#nation').text(d.Country)
         detail.select('img').attr('src', d.Volcano_Image)
+        detail.select('span#type').text(d.epoch_period)
+            .style('color', color_scale(d.epoch_period))
         d3.select(this).attr('stroke', 'black')
     }
 
@@ -122,20 +125,25 @@ const requestData = async function() {
     map.append('path').data([graticule()]).attr('d',path).attr('class','graticule')
         .style('fill','none')
         .style('stroke','grey')
+        .attr('opacity', 0.3)
 
     let points = map.selectAll('circle')
         .data(volcano)
         .join('circle')
         .attr('cx', d => d.position[0])
         .attr('cy', d => d.position[1])
-        .attr('r', 4)
+        .attr('r', 2)
         .attr('fill', d => color_scale(d.epoch_period))
-        .attr('opacity', 0.2)
+        .attr('opacity', 0.4)
         .attr('index', 0)
         .on('mouseover', focus)
         .on('mouseout', hide)
         .on('mousemove', move)
     
+    /*
+    d3.select(window).on('scroll', function (e,d) {
+        console.log('scroll')
+    })
     /*
     var lines = map.selectAll('path.graticule').data([graticule()])
     lines.enter().append('path').attr('class', 'graticule')
@@ -144,10 +152,10 @@ const requestData = async function() {
     */
 
     // Rotate the projection a little and update the points and so forth
-    function update() {
+    function update(ang) {
         yaw += 0.5
 
-        projection.rotate([yaw, -20])
+        projection.rotate([ang, -20])
         volcano.forEach( d => d.position = projection([d.long,d.lat]))
 
         map.selectAll('path.map')
@@ -164,10 +172,23 @@ const requestData = async function() {
             .attr('cx', d => d.position[0])
             .attr('cy', d => d.position[1])
 
+        map.select('path.graticule').data([graticule()])
+            .attr('d',path)
+
     }
 
     
     update()
+
+    let sliderupdate = function () {
+        let v = slider.node().valueAsNumber
+        console.log(v)
+        update(v)
+    }
+
+    let slider = d3.select('input#longitude')
+    slider.on('input', sliderupdate)
+    sliderupdate()
 
     //window.setInterval(update, 50)
 }

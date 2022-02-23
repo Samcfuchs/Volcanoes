@@ -88,10 +88,21 @@ div.detail div.img {
     float: left;
 }
 div.detail img {
-    height: 100px;
+    height: 150px;
 }
 
 span#title {
     font-size: 30px;
     color: black;
+}
+
+div.detail span.label {
+    color: black;
+    font-size: 10px;
+}
+
+input#longitude {
+    display: block;
+    padding: 10px;
+    width: 800px;
 }
