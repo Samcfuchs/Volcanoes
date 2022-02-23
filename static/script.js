@@ -89,6 +89,10 @@ const requestData = async function() {
 
     let color_scale = d3.scaleOrdinal().domain(volcano.map(d => d.epoch_period))
         .range(d3.schemeCategory10)
+    
+    let labels = chart.append('g').attr('class','label')
+    labels.append('text').text('Holocene Period').attr('y', 20).attr('fill', color_scale('holocene'))
+    labels.append('text').text('Pleistocene Period').attr('y', 40).attr('fill', color_scale('pleistocene'))
 
     //projection.fitSize([800,800], context)
     //projection.rotate([yaw, -20])
